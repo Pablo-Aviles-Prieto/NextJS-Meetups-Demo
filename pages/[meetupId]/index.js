@@ -4,6 +4,8 @@ import Head from 'next/head';
 import MeetupDetail from '../../components/meetups/MeetupDetail';
 
 const MeetupDetails = ({ meetupData }) => {
+  const notFound = meetupData.title.includes('404');
+
   return (
     <>
       <Head>
@@ -11,10 +13,11 @@ const MeetupDetails = ({ meetupData }) => {
         <meta name='description' content={meetupData.description} />
       </Head>
       <MeetupDetail
-        image={meetupData.image}
+        image={!notFound ? meetupData.image : ''}
         title={meetupData.title}
         address={meetupData.address}
         description={meetupData.description}
+        id={meetupData._id}
       />
     </>
   );
@@ -34,14 +37,26 @@ export async function getStaticPaths() {
   client.close();
 
   return {
-    fallback: false,
+    fallback: 'blocking',
     paths: meetups.map((meetup) => ({
-      params: { meetupId: meetup._id.toString(), test: '123' },
+      params: { meetupId: meetup._id.toString() },
     })),
   };
 }
 
 export async function getStaticProps(context) {
+  const mongoDbRegex = /^[a-f\d]{24}$/i;
+
+  if (!mongoDbRegex.test(context.params.meetupId)) {
+    return {
+      props: {
+        meetupData: {
+          title: '404 Not found',
+          description: `Can't found the specified resource. Check the URL and try again in a few moments!`,
+        },
+      },
+    };
+  }
   const meetupId = new ObjectId(context.params.meetupId);
 
   const client = await MongoClient.connect(process.env.MONGO_DB_URI);

@@ -9,9 +9,12 @@ const HomePage = (props) => {
     <>
       <Head>
         <title>NextJS Meetups by Pablo Avilés</title>
-        <meta name="description" content="Browse a huge list of meetups everywhere around the world (even in other planets)" />
+        <meta
+          name='description'
+          content='Browse a huge list of meetups everywhere around the world (even in other planets)'
+        />
       </Head>
-      <MeetupList meetups={props.meetups} />;
+      <MeetupList meetups={props.meetups} />
     </>
   );
 };
@@ -37,7 +40,7 @@ export async function getStaticProps() {
         image: meetup.image,
       })),
     },
-    revalidate: 60,
+    revalidate: 1,
   };
 }
 
